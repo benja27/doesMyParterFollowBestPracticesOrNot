@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Title</title>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS v5.2.1 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+  <script src='https://kit.fontawesome.com/7d931a3f92.js' crossorigin='anonymous'></script>
+
+
+
+</head>
+
+<body>
+  <header>
+    <!-- place navbar here -->
+  </header>
+  <main class="container-fluid bg-light d-flex justify-content-center align-items-center min-vh-100">
+    <div class="row bg-warning col-8">
+
+      <div class="col px-3 d-flex flex-column card">
+        <div class="d-flex align-items-center justify-content-between py-2">
+          <h4>Demo</h4>
+          <i class="fa-solid fa-refresh"></i>
+        </div>
+        <form class="mb-3" id="form">
+          <input type="text" class="form-control" name="" id="new-todo" aria-describedby="helpId"
+            placeholder="Add to your list ..">
+        </form>
+
+        <div class="" id="list-item-container">
+
+          <div class="item-itself mb-3">
+
+            <div class="form-check d-flex justify-content-between align-items-center ">
+
+              <input class="form-check-input" type="checkbox" value="" id="">
+
+              <span class="flex-grow-1 px-2">
+                <input type="text" class="form-control" name="" id="" aria-describedby="helpId"
+                  value="Manage all your list in " placeholder="">
+              </span>
+
+              <span>
+                <i class="fa-solid fa-trash"></i>
+              </span>
+            </div>
+          </div>
+          
+        </div>
+
+        <div class="bg-light text-center py-2" >          
+          <button type="button" class="btn btn-light text-off" id="clearList">Clear completed</button>
+        </div>
+
+
+
+      </div>
+
+      <div class="d-none" id="eslint">
+
+      </div>
+
+    </div>
+    </div>
+  </main>
+  <footer>
+    <!-- place footer here -->
+  </footer>
+  <!-- Bootstrap JavaScript Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js"
+    integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
+  </script>
+
+
+  <script>
+
+    // imports
+import html from './index.html';
+import './index.css';
+import { saveDb } from './modules.js/saveDb.js';
+import { saveToDo } from './modules.js/saveToDo.js';
+import { showDb } from './modules.js/showDb.js';
+import { changeIcons } from './modules.js/changeIcons.js';
+import { deleteItem } from './modules.js/delete.js';
+import { clearList } from './modules.js/clearList.js';
+
+clearList();
+
+// general variables
+
+const container = document.getElementById('list-item-container');
+const form = document.getElementById('form');
+const newTodo = document.getElementById('new-todo');
+
+// event listener
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  let index = 1;
+  if (localStorage.getItem('to-do-list')) {
+    index = Array.from(JSON.parse(localStorage.getItem('to-do-list')));
+  }
+  const item = {
+    index: index.length + 1 || index,
+    completed: false,
+    activity: newTodo.value,
+  };
+  saveToDo(item);
+  form.reset();
+  changeIcons();
+  saveDb(JSON.parse(localStorage.getItem('to-do-list')));
+});
+
+const esl = html;
+document.getElementById('eslint').innerHTML = esl;
+
+window.addEventListener('DOMContentLoaded', () => {
+  changeIcons();
+  if (localStorage.getItem('to-do-list')) {
+    showDb(JSON.parse(localStorage.getItem('to-do-list')));
+    changeIcons();
+  }
+});
+
+container.addEventListener('click', (e) => {
+  if (e.target.classList.contains('form-check-input')) {
+    const { id } = e.target.dataset;
+    const db = JSON.parse(localStorage.getItem('to-do-list'));
+    db[id].completed = !db[id].completed;
+    saveDb(db);
+  }
+
+  if (e.target.classList.contains('fa-trash')) {
+    const { id } = e.target.dataset;
+    deleteItem(id);
+  }
+});
+
+export const changeIcons = () => {
+  const allActivites = Array.from(document.querySelectorAll('.todo'));
+
+  allActivites.forEach((element) => {
+    element.addEventListener('change', (e) => {
+      e.preventDefault();
+      const db = JSON.parse(localStorage.getItem('to-do-list'));
+      db[e.target.dataset.id].activity = e.target.value;
+      localStorage.setItem('to-do-list', JSON.stringify(db));
+    });
+
+    element.addEventListener('focus', (e) => {
+      e.target.nextElementSibling.classList.add('fa-trash');
+      e.target.nextElementSibling.classList.remove('fa-ellipsis-vertical');
+      setTimeout(() => {
+        e.target.nextElementSibling.classList.remove('trash');
+        e.target.nextElementSibling.classList.add('fa-ellipsis-vertical');
+      }, 2000);
+    });
+  });
+};
+
+
+
+
+
+export default changeIcons;
+
+
+
+import { saveDb } from './saveDb.js';
+
+export const clearList = () => {
+  document.getElementById('clearList').addEventListener('click', () => {
+    const db = JSON.parse(localStorage.getItem('to-do-list'));
+    const incompleteTodos = db.filter((element) => !element.completed);
+    saveDb(incompleteTodos);
+  });
+};
+
+export default clearList;
+
+
+import { saveDb } from './saveDb.js';
+
+export const deleteItem = (index) => {
+  const db = JSON.parse(localStorage.getItem('to-do-list'));
+  // localStorage.setItem('to-do-list', JSON.stringify(db));
+  db.splice(index, 1);
+  saveDb(db);
+};
+
+export default deleteItem;
+
+  </script>
+</body>
+
+</html>
